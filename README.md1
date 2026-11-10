@@ -18,6 +18,7 @@ To understand sales performance, customer purchasing behavior, product performan
 3. **Product Inventory:** Contains product details and inventory information.
 
 ## Business Problems and Solutions
+
 1.Remove Duplicates
 
 select transactionid,count(*)
@@ -215,12 +216,57 @@ order by COUNT(*)  DESC;
 - Window Functions
 
 ## Key Business Insights
-Insights derived from the SQL analysis are documented in the `insights/business_insights.md` file.
+
+The Retail Analytics project uses SQL to analyze sales transactions, customer profiles, and product inventory to identify business trends and support data-driven decision-making.
+
+### 1. Sales Performance Analysis
+- Calculate total revenue, total orders, and total units sold.
+- Analyze monthly and yearly sales trends.
+- Identify peak sales periods and revenue patterns.
+- Track average order value (AOV).
+
+### 2. Product Performance Analysis
+- Identify the top 5 best-selling products based on quantity sold.
+- Identify products generating the highest revenue.
+- Compare product performance to identify low-performing products.
+- Evaluate product and category-wise sales contributions.
+
+### 3. Customer Behavior Analysis
+- Identify high-value customers based on total spending.
+- Analyze repeat purchases and customer retention.
+- Segment customers based on purchasing behavior.
+- Identify customers contributing the highest revenue.
+
+### 4. Inventory Analysis
+- Identify products with low stock availability.
+- Analyze the relationship between product sales and inventory levels.
+- Identify slow-moving products with excess inventory.
+- Highlight products that may require stock replenishment.
+
+### 5. Business Recommendations
+- Focus marketing campaigns on high-performing products.
+- Introduce loyalty strategies to retain valuable customers.
+- Optimize inventory based on product demand.
+- Improve sales strategies during low-performing periods.
+- Use customer purchasing patterns for targeted promotions.
+
+### 6. Key Performance Indicators (KPIs)
+- Total Revenue
+- Total Orders
+- Total Units Sold
+- Average Order Value (AOV)
+- Unique Customers
+- Repeat Customer Rate
+- Top 5 Best-Selling Products
+- Category-wise Revenue
+- Low-Stock Product Count
+
+### Conclusion
+This SQL-based retail analytics project demonstrates how data can be transformed into actionable business insights using SQL joins, aggregate functions, subqueries, CTEs, and window functions. It helps businesses understand sales performance, customer behavior, product trends, and inventory management.
 
 ## Project Structure
 - data/ – Raw datasets
 - sql/ – SQL queries
 - insights/ – Business findings
 
-## Conclusion
-This project demonstrates how SQL can be used to analyze retail datasets, identify business trends, and support data-driven decision-making.
+
