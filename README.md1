@@ -1,0 +1,226 @@
+# Retail Analytics Case Study Using SQL
+
+## Project Overview
+This project focuses on analyzing retail business data using SQL to transform raw datasets into meaningful business insights.
+
+The analysis uses three datasets:
+- Sales Transactions
+- Customer Profiles
+- Product Inventory
+
+## Business Objective
+To understand sales performance, customer purchasing behavior, product performance, and inventory trends through SQL-based analysis.
+
+## Dataset Description
+
+1. **Sales Transactions:** Contains transaction-level sales information.
+2. **Customer Profiles:** Contains customer demographic and profile information.
+3. **Product Inventory:** Contains product details and inventory information.
+
+## Business Problems and Solutions
+1.Remove Duplicates
+
+select transactionid,count(*)
+from sales_transaction
+group by transactionid
+HAVING count(*) > 1;
+create table sales_transaction_nodup as select distinct * from sales_transaction;
+##Dropped the old table,
+drop table sales_transaction;
+##Renamed the deduplicated table back to the original name.
+alter table sales_transaction_nodup
+rename to sales_transaction;
+select *
+from sales_transaction;
+
+2.Fix Incorrect prices
+
+select s.TransactionID,  s.Price as TransactionPrice,p.price as InventoryPrice
+from sales_transaction as s
+join product_inventory as p
+on s.productid=p.productid
+WHERE s.price <> p.price;
+UPDATE sales_transaction s
+JOIN product_inventory p
+ ON s.productid = p.productid
+SET s.price = p.price
+where s.price <> p.price;
+select *
+from sales_transaction;
+
+3.Fixing Null Values
+
+select count(*)
+from customer_profiles
+where location is null;
+update  customer_profiles
+set  Location ='Unknown'
+where  location is null;
+select CustomerID, Age, Gender, Location, JoinDate
+from customer_profiles;
+
+4.Cleaning Data
+
+create table Sales_TransactionDate as select * , cast(TransactionDate as DATE) AS TransactionDate_updated
+from Sales_transaction;
+DROP TABLE SALES_TRANSACTION;
+ALTER TABLE  Sales_TransactionDate
+RENAME TO sales_transaction;
+select *
+from sales_transaction;
+
+5.Total Sales Summary
+
+SELECT productID, sum(QuantityPurchased) as TotalUnitsSold,
+sum(Price * QuantityPurchased) as TotalSales
+from sales_transaction 
+Group by productID
+order by TotalSales desc;
+
+6.Customer Purchase Frequency
+
+select CustomerID, count(TransactionID) as NumberofTransactions
+from sales_transaction
+Group by CustomerID
+order by NumberofTransactions desc;
+
+7.Product Categories Performance
+
+SELECT p.category, sum(s.QuantityPurchased) as TotalUnitsSold,
+sum(s.Price * QuantityPurchased) as TotalSales
+from sales_transaction as s
+join product_inventory as p
+on s.ProductID=p.ProductID
+Group by p.category
+order by TotalSales desc;
+
+8.High Sales Products
+
+select ProductID,sum(QuantityPurchased * Price) as TotalRevenue
+from Sales_transaction
+Group by ProductID
+order by TotalRevenue desc
+Limit 10;
+
+9.Low Sales Products
+
+select productID, sum(QuantityPurchased) as TotalUnitsSold
+from Sales_transaction
+Group by productID
+having TotalUnitsSold >0
+order by TotalUnitsSold asc
+limit 10;
+
+10.Sales Trend
+
+select DATE_FORMAT(TransactionDate,'%Y-%m-%d') as DATETRANS,
+COUNT(TRANSACTIONID) AS Transaction_count,
+sum(QuantityPurchased) as TotalUnitsSold,
+round(sum(QuantityPurchased * Price),2) as TotalSales
+from sales_transaction
+Group by DATE_FORMAT(TransactionDate,'%Y-%m-%d')
+order by DATETRANS desc;
+
+11.Growth Rate of Sales
+
+with sales as
+(
+    select MONTH(TransactionDate) as month,
+round(sum(QuantityPurchased * Price),2) as total_sales
+from sales_transaction
+ group by MONTH(TransactionDate)
+)
+select month,total_sales,
+round(lag(total_sales) over (order by month),2) as previous_month_sales,
+round((total_sales-lag(total_sales)over (order by month))/lag(total_sales) over (order by month) *100,2) as mom_growth_percentage
+from sales
+order by month;
+
+12.High Purchase Frequency
+select  CustomerID, count(TransactionID)  as NumberofTransactions,
+sum(price * QuantityPurchased) as TotalSpent
+from Sales_transaction
+Group by customerID
+having count(TransactionID) >10  and sum(price * QuantityPurchased) >1000
+order by TotalSpent desc;
+
+13.Occassional Customers
+
+select  CustomerID, count(TransactionID)  as NumberofTransactions,
+sum(price * QuantityPurchased) as TotalSpent
+from Sales_transaction
+Group by customerID
+having count(TransactionID) <=2 
+order by NumberOfTransactions asc , TotalSpent desc;
+
+14.Repeat Purchases
+
+select CustomerID , ProductID, count(QuantityPurchased) as TimesPurchased
+from sales_transaction
+Group  by CustomerID , ProductID
+having  count(QuantityPurchased) >1
+order by TimesPurchased desc;
+
+15.Loyalty Indicators
+
+select CustomerID, 
+min(DATE_FORMAT(TransactionDate,'%Y-%m-%d')) as FirstPurchase,
+max(DATE_FORMAT(TransactionDate,'%Y-%m-%d')) as LastPurchase,
+DATEDIFF(max(DATE_FORMAT(TransactionDate,'%Y-%m-%d')) , min(DATE_FORMAT(TransactionDate,'%Y-%m-%d')))
+as DaysBetweenPurchases
+from Sales_transaction
+Group by CustomerID
+having  DATEDIFF(max(DATE_FORMAT(TransactionDate,'%Y-%m-%d')) , min(DATE_FORMAT(TransactionDate,'%Y-%m-%d'))) >0
+order by DaysBetweenPurchases desc;
+
+16.Customer Segmentation
+
+with sales as
+(
+    SELECT 
+case when sum(s.quantityPurchased) BETWEEN 1 AND 10 then 'Low' 
+         when sum(s.quantityPurchased) between 11 and 30 then 'Med'
+         Else 'High'
+         End as CustomerSegment
+FROM sales_transaction as s
+join customer_profiles as p
+on s.customerID=p.customerID
+Group by  s.customerID
+)
+select CustomerSegment,COUNT(*)
+from sales
+Group by CustomerSegment
+order by COUNT(*)  DESC;
+
+## Tools & Technologies
+- MySQL
+- SQL
+- MySQL Workbench
+
+## Key Analysis Areas
+- Sales performance analysis
+- Customer segmentation and purchasing behavior
+- Product performance analysis
+- Revenue trends
+- Inventory analysis
+- Identification of business opportunities
+
+## SQL Concepts Used
+- SELECT, WHERE, ORDER BY
+- GROUP BY and HAVING
+- Aggregate Functions
+- Joins
+- Subqueries
+- Common Table Expressions (CTEs)
+- Window Functions
+
+## Key Business Insights
+Insights derived from the SQL analysis are documented in the `insights/business_insights.md` file.
+
+## Project Structure
+- data/ – Raw datasets
+- sql/ – SQL queries
+- insights/ – Business findings
+
+## Conclusion
+This project demonstrates how SQL can be used to analyze retail datasets, identify business trends, and support data-driven decision-making.
